@@ -31,19 +31,17 @@
 /// ```
 #[macro_export]
 macro_rules! pam_hooks {
-	($ident:ident) => (
+	($ident:ident) => {
 		pub use self::pam_hooks_scope::*;
 		mod pam_hooks_scope {
-			use $crate::module::{PamHandle, PamHooks};
-			use $crate::constants::{PamFlag, PamResultCode};
 			use std::ffi::CStr;
 			use std::os::raw::{c_char, c_int};
+			use $crate::constants::{PamFlag, PamResultCode};
+			use $crate::module::{PamHandle, PamHooks};
 
 			fn extract_argv<'a>(argc: c_int, argv: *const *const c_char) -> Vec<&'a CStr> {
 				(0..argc)
-					.map(|o| unsafe {
-						CStr::from_ptr(*argv.offset(o as isize) as *const c_char)
-					})
+					.map(|o| unsafe { CStr::from_ptr(*argv.offset(o as isize) as *const c_char) })
 					.collect()
 			}
 
@@ -113,12 +111,12 @@ macro_rules! pam_hooks {
 				super::$ident::sm_setcred(pamh, args, flags)
 			}
 		}
-	)
+	};
 }
 
 #[cfg(test)]
 pub mod test {
-	use module::PamHooks;
+	use crate::module::PamHooks;
 
 	struct Foo;
 	impl PamHooks for Foo {}
