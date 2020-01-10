@@ -54,6 +54,15 @@ extern "C" {
         user: &*mut c_char,
         prompt: *const c_char,
     ) -> PamResultCode;
+
+    // Linux-PAM extensions
+    
+    fn pam_get_authtok(
+        pamh: *const PamHandle,
+        item_type: PamItemType,
+        authtok: &*mut c_char,
+        prompt: *const c_char,
+    ) -> PamResultCode;
 }
 
 pub extern "C" fn cleanup<T>(_: *const PamHandle, c_data: Box<PamDataT>, _: PamResultCode) {
@@ -175,6 +184,28 @@ impl PamHandle {
             None => ptr::null(),
         };
         let res = unsafe { pam_get_user(self, &ptr, c_prompt) };
+        if PamResultCode::PAM_SUCCESS == res && !ptr.is_null() {
+            let const_ptr = ptr as *const c_char;
+            let bytes = unsafe { CStr::from_ptr(const_ptr).to_bytes() };
+            String::from_utf8(bytes.to_vec()).map_err(|_| PamResultCode::PAM_CONV_ERR)
+        } else {
+            Err(res)
+        }
+    }
+
+    /// Retrieves the requested AUTHTOK item.
+    ///
+    /// This is really a specialization of `get_item`.
+    ///
+    /// See `pam_get_authtok` in
+    /// http://www.linux-pam.org/Linux-PAM-html/mwg-expected-by-module-item.html
+    pub fn get_authtok<T: PamItem>(&self, prompt: Option<&str>) -> PamResult<String> {
+        let ptr: *mut c_char = ptr::null_mut();
+        let c_prompt = match prompt {
+            Some(p) => CString::new(p).unwrap().as_ptr(),
+            None => ptr::null(),
+        };
+        let res = unsafe { pam_get_authtok(self, T::item_type(), &ptr, c_prompt) };
         if PamResultCode::PAM_SUCCESS == res && !ptr.is_null() {
             let const_ptr = ptr as *const c_char;
             let bytes = unsafe { CStr::from_ptr(const_ptr).to_bytes() };
