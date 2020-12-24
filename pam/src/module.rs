@@ -56,7 +56,7 @@ extern "C" {
     ) -> PamResultCode;
 
     // Linux-PAM extensions
-    
+
     fn pam_get_authtok(
         pamh: *const PamHandle,
         item_type: PamItemType,
@@ -233,7 +233,7 @@ pub trait PamHooks {
     }
 
     /// This function performs the task of authenticating the user.
-    fn sm_authenticate(pamh: &PamHandle, args: Vec<&CStr>, flags: PamFlag) -> PamResultCode {
+    fn sm_authenticate(pamh: &mut PamHandle, args: Vec<&CStr>, flags: PamFlag) -> PamResultCode {
         PamResultCode::PAM_IGNORE
     }
 
