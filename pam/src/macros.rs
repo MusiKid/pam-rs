@@ -58,7 +58,7 @@ macro_rules! pam_hooks {
 
             #[no_mangle]
             pub extern "C" fn pam_sm_authenticate(
-                pamh: &mut PamHandle,
+                pamh: &'static mut PamHandle,
                 flags: PamFlag,
                 argc: c_int,
                 argv: *const *const c_char,

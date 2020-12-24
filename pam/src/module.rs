@@ -233,7 +233,11 @@ pub trait PamHooks {
     }
 
     /// This function performs the task of authenticating the user.
-    fn sm_authenticate(pamh: &mut PamHandle, args: Vec<&CStr>, flags: PamFlag) -> PamResultCode {
+    fn sm_authenticate(
+        pamh: &'static mut PamHandle,
+        args: Vec<&CStr>,
+        flags: PamFlag,
+    ) -> PamResultCode {
         PamResultCode::PAM_IGNORE
     }
 
